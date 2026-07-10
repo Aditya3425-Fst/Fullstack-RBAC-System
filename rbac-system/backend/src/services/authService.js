@@ -41,8 +41,8 @@ const sendOTP = async ({ mobile, ipAddress, userAgent }) => {
     expiresIn: expirySeconds,
   };
 
-  // In development mode, return OTP in response
-  if (process.env.NODE_ENV === 'development') {
+  // Return OTP in response when SHOW_OTP=true (works on both localhost and production)
+  if (process.env.SHOW_OTP === 'true') {
     response.otp = otp;
   }
 

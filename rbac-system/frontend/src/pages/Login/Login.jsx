@@ -260,10 +260,10 @@ const Login = () => {
                   <div className="dev-otp-banner">
                     <div className="dev-otp-label">
                       <span>🔧</span>
-                      <span>Development Mode — Your OTP</span>
+                      <span>Your OTP (use this to verify)</span>
                     </div>
                     <div className="dev-otp-value">{devOtp}</div>
-                    <p className="dev-otp-note">Only visible in development mode</p>
+                    <p className="dev-otp-note">Copy this OTP and paste it in the field below</p>
                   </div>
                 )}
 
