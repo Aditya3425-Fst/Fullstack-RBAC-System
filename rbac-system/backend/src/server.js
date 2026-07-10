@@ -8,7 +8,6 @@ const cookieParser = require('cookie-parser');
 
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
-const path = require('path');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -18,7 +17,6 @@ const logRoutes = require('./routes/logRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const __dirname = path.resolve();
 
 // ─── Security Middleware ────────────────────────────────────────────────────
 app.use(helmet());
@@ -71,12 +69,6 @@ app.use((req, res) => {
 // ─── Central Error Handler ──────────────────────────────────────────────────
 app.use(errorHandler);
 
-if(process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, "../frontend/dist" )));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-  });
-}
 // ─── Start Server ────────────────────────────────────────────────────────────
 const startServer = async () => {
   await connectDB();
