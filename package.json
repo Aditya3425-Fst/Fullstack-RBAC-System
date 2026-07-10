@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm install --prefix rbac-system/backend && npm install --prefix rbac-system/frontend && npm run build --prefix rbac-system/frontend",
-    "start": "npm run start --prefix backend"
+    "start": "npm run start --prefix rbac-system/backend"
   },
   "keywords": [],
   "author": "",
