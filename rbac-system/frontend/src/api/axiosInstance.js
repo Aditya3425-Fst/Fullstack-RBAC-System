@@ -1,8 +1,14 @@
 import axios from 'axios';
 import { getToken, clearAuth } from '../utils/storage';
 
+// In production the frontend is served by the backend on the same domain,
+// so use a relative /api path. In development use the full localhost URL.
+const baseURL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.MODE === "development" ?  'http://localhost:5000/api' :"/api",
+  baseURL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -10,7 +16,6 @@ const axiosInstance = axios.create({
 });
 
 // ─── Request Interceptor ────────────────────────────────────────────────────
-// Automatically attach JWT token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getToken();
@@ -19,19 +24,15 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // ─── Response Interceptor ───────────────────────────────────────────────────
-// Handle 401 globally - clear auth and redirect to login
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       clearAuth();
-      // Only redirect if not already on login page
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }

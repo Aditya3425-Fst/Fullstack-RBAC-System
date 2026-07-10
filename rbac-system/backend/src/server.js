@@ -5,6 +5,8 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const path = require('path');
+const fs = require('fs');
 
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
@@ -19,7 +21,9 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // ─── Security Middleware ────────────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // allow Vite assets to load
+}));
 
 app.use(
   cors({
@@ -58,13 +62,25 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/logs', logRoutes);
 
-// ─── 404 Handler ────────────────────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.method} ${req.originalUrl} not found.`,
+// ─── Serve Frontend (production) ────────────────────────────────────────────
+const frontendDist = path.join(__dirname, '../../frontend/dist');
+
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+
+  // All non-API routes serve the React app (handles client-side routing)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
   });
-});
+} else {
+  // API-only fallback if frontend not built
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      message: `Route ${req.method} ${req.originalUrl} not found.`,
+    });
+  });
+}
 
 // ─── Central Error Handler ──────────────────────────────────────────────────
 app.use(errorHandler);
@@ -76,10 +92,10 @@ const startServer = async () => {
   const server = app.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost:${PORT}`);
     logger.info(`📡 Environment: ${process.env.NODE_ENV}`);
-    logger.info(`🔒 CORS allowed origin: ${process.env.FRONTEND_URL}`);
+    logger.info(`🔒 CORS origin: ${process.env.FRONTEND_URL}`);
+    logger.info(`📁 Frontend dist: ${fs.existsSync(frontendDist) ? 'found ✅' : 'not found ❌'}`);
   });
 
-  // Graceful shutdown
   process.on('SIGTERM', () => {
     logger.info('SIGTERM received. Shutting down gracefully...');
     server.close(() => {
