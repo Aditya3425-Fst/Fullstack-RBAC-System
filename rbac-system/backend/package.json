@@ -2,6 +2,7 @@
   "name": "rbac-backend",
   "version": "1.0.0",
   "description": "Production-ready RBAC Authentication & User Management REST API",
+  "type": "commonjs",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
